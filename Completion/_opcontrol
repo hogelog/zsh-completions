@@ -1,0 +1,49 @@
+#compdef opcontrol
+
+_arguments \
+   '(- *)'{-?,--help}'[this message]' \
+   '(- *)'{-v,--version}'[show version]' \
+   '(- *)'{-l,--list-events}'[list event types and unit masks]' \
+   '(- *)--init[loads the oprofile module and oprofilefs]' \
+   '()--setup[give setup arguments (may be omitted)]' \
+   '(- *)--status[show configuration]' \
+   '( *)--start-daemon[start daemon without starting profiling]' \
+   '( *)'{-s,--start}'[start data collection]' \
+   '(- *)'{-d,--dump}'[flush the collected profiling data]' \
+   '(- *)'{-t,--stop}'[stop data collection]' \
+   '(- *)'{-h,--shutdown}'[stop data collection and kill daemon]' \
+   '(-V --verbose)'{-V=,--verbose=}'[be verbose in the daemon log]::verbose:(all sfile arcs samples module misc)' \
+   '(- *)--reset[clears out data from current session]' \
+   '(- *)--save=[save data from current session to session_name]:session' \
+   '(- *)'{-e=,--event=}'[choose an event]::event:->event' \
+   '(- *)'--deinit'[unload the oprofile module and oprofilefs]' \
+   '(- *)'{-p=,--separate=}'[separate profiles]::separate:(none library kernel thread cpu all)' \
+   '(- *)'{-c=,--callgraph=}'[enable callgraph sample collection with a maximum depth]:callgraph' \
+   '( *)--session-dir=[place sample database in dir instead of default location]::session:_directories' \
+   '( *)--image=[list of binaries to profile]::image:->image' \
+   '(--no-vmlinux *)--vmlinux=[vmlinux kernel image]::vmlinux:_files' \
+   '(--vmlinux *)--no-vmlinux[no kernel image (vmlinux) available]' \
+   '()--kernel-range=[kernel range vma address in hexadecimal]:range' \
+   '()--buffer-size=[kernel buffer size in sample units]:size' \
+   '()--buffer-watershed[kernel buffer watershed in sample units (2.6 only)]' \
+   '()--cpu-buffer-size=[per-cpu buffer size in units (2.6 only)]:size' \
+   '()--note-table-size=[kernel notes buffer size in notes units (2.4 only)]:size' \
+   '()--xen=[Xen image (for Xen only)]:image' \
+   '()--active-domains=[List of domains in profiling session (for Xen only)]:domains' \
+
+case "$state" in
+  image)
+    _alternative \
+      'switch:switch:(all)' \
+      'executable:executables:_files -g \*\(-\*\)'
+  ;;
+  event)
+    #compadd $(_call_program events ophelp 2>/dev/null|sed '1,2d'|sed '/^\s/d'|sed 's/:.*//g')
+    local -a events
+    events=($(_call_program events ophelp 2>/dev/null|sed '1,2d'|sed '/^\s/d'|sed 's/:.*//g'))
+    #_describe -t events 'event type' $events
+    _wanted events expl 'event type' compadd $events
+  ;;
+esac
+
+# vim: ft=zsh sw=2 ts=2 et:
